@@ -1,11 +1,11 @@
 #importign required libraries
 import speech_recognition as sr
-import cv2
 import pyttsx3
 import os
 from openai import OpenAI
 import base64
 import mimetypes
+
 
 # Load the image file
 img_path = "webcam_photo.jpg"
@@ -13,10 +13,14 @@ gpt_model = "gpt-4o"
 # Determine the MIME type (e.g., image/jpeg)
 img_type, _ = mimetypes.guess_type(img_path)
 
+
 client = OpenAI(
     # This is the default and can be omitted
-    api_key=("YOUR API KEY"),
+    api_key=("YOUR_API_KEY"),
 )
+
+
+
 
 
 
@@ -25,10 +29,14 @@ r = sr.Recognizer()
 m = sr.Microphone()
 r.dynamic_energy_threshold = True
 r.pause_threshold = 0.5
+r.non_speaking_duration = .35
+r.pause_threshold = .7
+
 
 #setting up camera object
-cap = cv2.VideoCapture(0) 
 #learn AWS
+
+
 
 
 #take in a string and speak it through the headphones
@@ -37,8 +45,11 @@ def speaking_text(text):
     engine.say(text)
     engine.runAndWait()
 
+
 def move_servo(degrees): #implement if time allows
     pass
+
+
 
 
 def get_description_from_image(image,uinput):
@@ -47,6 +58,7 @@ def get_description_from_image(image,uinput):
     with open(image, "rb") as img_file:
         img_b64_str = base64.b64encode(img_file.read()).decode("utf-8")
     prompt = uinput
+
 
     response = client.chat.completions.create(
         model=gpt_model,
@@ -74,8 +86,10 @@ def get_description_from_image(image,uinput):
         ],
     )
 
+
     result = response.choices[0].message.content
     return result
+
 
 try:
     while True:
@@ -84,31 +98,40 @@ try:
         move_servo(0)
 
 
-        with m as source: audio = r.listen(source)
+
+
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+            audio = r.listen(source)
+
+
+
 
         print("Interpreting audio")
         speaking_text("Interpreting audio")
         move_servo(90)
         
 
+
         try:
             # recognize speech using Google Speech Recognition
             value = r.recognize_google(audio)
+
 
             print("you said",value)
             value = value.lower()
             jarvis_location = value.find('jarvis')
 
+
             if jarvis_location != -1:
                 uinput = value[(jarvis_location+6):]
-                ret, frame = cap.read()
-
-                # Check if the frame was captured successfully
-                if ret:
-                    # Save the image
-                    cv2.imwrite("webcam_photo.jpg", frame)
+                
+                os.system('fswebcam -S 40 --no-banner -d /dev/video0 webcam_photo.jpg')
+                
                 speaking_text(get_description_from_image("webcam_photo.jpg",uinput))
                 
+
+
 
 
         except sr.UnknownValueError:
@@ -117,3 +140,8 @@ try:
             print("Check your wifi; {0}".format(e))
 except KeyboardInterrupt:
     pass
+
+
+
+
+
