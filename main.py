@@ -63,7 +63,8 @@ def get_description_from_image(image,uinput):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "You are a visual aid please try to explain what you see in the image to the best of your ability, here is the users specific question: "+prompt},
+                    {"type": "text",
+                     "text": prompt},
                     {
                         "type": "image_url",
                         "image_url": {"url": f"data:{img_type};base64,{img_b64_str}"},
