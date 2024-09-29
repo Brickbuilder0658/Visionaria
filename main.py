@@ -9,7 +9,7 @@ import mimetypes
 
 # Load the image file
 img_path = "webcam_photo.jpg"
-
+gpt_model = "gpt-4o"
 # Determine the MIME type (e.g., image/jpeg)
 img_type, _ = mimetypes.guess_type(img_path)
 
@@ -49,8 +49,17 @@ def get_description_from_image(image,uinput):
     prompt = uinput
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=gpt_model,
         messages=[
+            {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "You are a porfessional vision aid. Your job is to take the user input and repsond in a helpful manner. Give clear directions to lead them to their destinations such a straight ahead, to your right/left, in front of you, etc. DO NOT SAY THE WORD IMAGE OR SCENE. IF IT IS CLOSE BY JUST SAY: 'IT IS IN FRONT OF YOU'. YOU ARE TRYING TO NAVIGATIVE AND HELP A PERSON WHO IS BLIND."
+                            }
+                        ]
+                    },
             {
                 "role": "user",
                 "content": [
